@@ -33,9 +33,12 @@ var jtt1078Config = &Jtt1078Config{
 var Jtt1078Plugin = InstallPlugin(jtt1078Config)
 
 // 插件事件回调，来自事件总线
-func (conf *Jtt1078Config) OnEvent(event any) {
+func (c *Jtt1078Config) OnEvent(event any) {
 	switch event.(type) {
 	case FirstConfig: // 插件启动事件
+		if c.TCP.ListenAddr != "" {
+			go c.ListenTCP(Jtt1078Plugin, c)
+		}
 		break
 	}
 }
