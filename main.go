@@ -1,4 +1,4 @@
-package demo
+package jtt1078
 
 import (
 	"net/http"
@@ -7,38 +7,43 @@ import (
 	"m7s.live/engine/v4/config"
 	"m7s.live/engine/v4/track"
 )
+
 /*
 自定义配置结构体
 配置文件中可以添加相关配置来设置结构体的值
-demo:
+jtt1078:
+
 	http:
 	publish:
 	subscribe:
 	foo: bar
 */
-type DemoConfig struct {
+type Jtt1078Config struct {
 	config.HTTP
 	config.Publish
 	config.Subscribe
-	Foo string `default:"bar"`
+	config.TCP
 }
 
-var demoConfig DemoConfig
+var jtt1078Config = &Jtt1078Config{
+	TCP: config.TCP{ListenAddr: ":9024"},
+}
+
 // 安装插件
-var DemoPlugin = InstallPlugin(&demoConfig)
+var Jtt1078Plugin = InstallPlugin(jtt1078Config)
+
 // 插件事件回调，来自事件总线
-func (conf *DemoConfig) OnEvent(event any) {
+func (conf *Jtt1078Config) OnEvent(event any) {
 	switch event.(type) {
-	case FirstConfig:
-		// 插件启动事件
+	case FirstConfig: // 插件启动事件
 		break
 	}
 }
 
-// http://localhost:8080/demo/api/test/pub
-func (conf *DemoConfig) API_test_pub(rw http.ResponseWriter, r *http.Request) {
-	var pub DemoPublisher
-	err := DemoPlugin.Publish("demo/test", &pub)
+// http://localhost:8080/jtt1078/api/test/pub
+func (conf *Jtt1078Config) API_test_pub(rw http.ResponseWriter, r *http.Request) {
+	var pub Jtt1078Publisher
+	err := Jtt1078Plugin.Publish("jtt1078/test", &pub)
 	if err != nil {
 		rw.Write([]byte(err.Error()))
 		return
@@ -50,10 +55,10 @@ func (conf *DemoConfig) API_test_pub(rw http.ResponseWriter, r *http.Request) {
 	rw.Write([]byte("test_pub"))
 }
 
-// http://localhost:8080/demo/api/test/sub
-func (conf *DemoConfig) API_test_sub(rw http.ResponseWriter, r *http.Request) {
-	var sub DemoSubscriber
-	err := DemoPlugin.Subscribe("demo/test", &sub)
+// http://localhost:8080/jtt1078/api/test/sub
+func (conf *Jtt1078Config) API_test_sub(rw http.ResponseWriter, r *http.Request) {
+	var sub Jtt1078Subscriber
+	err := Jtt1078Plugin.Subscribe("jtt1078/test", &sub)
 	if err != nil {
 		rw.Write([]byte(err.Error()))
 		return
@@ -62,25 +67,37 @@ func (conf *DemoConfig) API_test_sub(rw http.ResponseWriter, r *http.Request) {
 	}
 	rw.Write([]byte("test_sub"))
 }
+
 // 自定义发布者
-type DemoPublisher struct {
+type Jtt1078Publisher struct {
 	Publisher
 }
+
 // 发布者事件回调
-func (pub *DemoPublisher) OnEvent(event any) {
-	switch event.(type) {
-	case IPublisher:
-		// 发布成功
+func (pub *Jtt1078Publisher) OnEvent(event any) {
+	switch v := event.(type) {
+	case IPublisher: //代表发布成功事件
+	case SEclose: //代表关闭事件
+	case SEKick: //被踢出
+	case ISubscriber:
+		if v.IsClosed() {
+			//订阅者离开
+		} else {
+			//订阅者进入
+		}
+
 	default:
 		pub.Publisher.OnEvent(event)
 	}
 }
+
 // 自定义订阅者
-type DemoSubscriber struct {
+type Jtt1078Subscriber struct {
 	Subscriber
 }
+
 // 订阅者事件回调
-func (sub *DemoSubscriber) OnEvent(event any) {
+func (sub *Jtt1078Subscriber) OnEvent(event any) {
 	switch event.(type) {
 	case ISubscriber:
 		// 订阅成功
