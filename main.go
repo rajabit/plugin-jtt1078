@@ -3,6 +3,7 @@ package jtt1078
 import (
 	"net/http"
 
+	"go.uber.org/zap"
 	. "m7s.live/engine/v4"
 	"m7s.live/engine/v4/config"
 	"m7s.live/engine/v4/track"
@@ -26,7 +27,7 @@ type Jtt1078Config struct {
 }
 
 var jtt1078Config = &Jtt1078Config{
-	TCP: config.TCP{ListenAddr: ":9024"},
+	TCP: config.TCP{ListenAddr: ":9022"},
 }
 
 // 安装插件
@@ -37,6 +38,7 @@ func (c *Jtt1078Config) OnEvent(event any) {
 	switch event.(type) {
 	case FirstConfig: // 插件启动事件
 		if c.TCP.ListenAddr != "" {
+			Jtt1078Plugin.Info("server jtt1078 start at", zap.String("listen addr", c.TCP.ListenAddr))
 			go c.ListenTCP(Jtt1078Plugin, c)
 		}
 		break

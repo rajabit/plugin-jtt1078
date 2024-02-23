@@ -2,10 +2,12 @@ package jtt1078
 
 import (
 	"bufio"
+	"fmt"
 	"net"
 
 	"go.uber.org/zap"
 	. "m7s.live/engine/v4"
+	"m7s.live/engine/v4/util"
 )
 
 type NetStream struct {
@@ -44,22 +46,47 @@ func NewNetConnection(conn net.Conn) *NetConnection {
 	}
 }
 
-func (config *Jtt1078Config) ServeTCP(conn net.Conn) {
-	defer conn.Close()
-	logger := Jtt1078Plugin.Logger.With(zap.String("remote", conn.RemoteAddr().String()))
-	senders := make(map[uint32]*Jtt1078Subscriber)
-	receivers := make(map[uint32]*Jtt1078Receiver)
-	var err error
-	logger.Info("conn")
-	defer func() {
-		ze := zap.Error(err)
-		logger.Info("conn close", ze)
-		for _, sender := range senders {
-			sender.Stop(ze)
+// func (config *Jtt1078Config) ServeTCP(conn net.Conn) {
+// 	defer conn.Close()
+// 	logger := Jtt1078Plugin.Logger.With(zap.String("remote", conn.RemoteAddr().String()))
+// 	senders := make(map[uint32]*Jtt1078Subscriber)
+// 	receivers := make(map[uint32]*Jtt1078Receiver)
+// 	var err error
+// 	logger.Info("conn")
+// 	defer func() {
+// 		ze := zap.Error(err)
+// 		logger.Info("conn close", ze)
+// 		for _, sender := range senders {
+// 			sender.Stop(ze)
+// 		}
+// 		for _, receiver := range receivers {
+// 			receiver.Stop(ze)
+// 		}
+// 	}()
+// 	nc := NewNetConnection(conn)
+// 	for {
+// 		if msg, err = nc.RecvMessage(); err == nil {
+// 			if msg.MessageLength <= 0 {
+// 				continue
+// 			}
+// 			switch msg.MessageTypeID {
+// 			case RTMP_MSG_AMF0_COMMAND:
+// 			}
+// 		}
+// 	}
+// }
+
+func (c *Jtt1078Config) ServeTCP(conn net.Conn) {
+	fmt.Println("in main ServeTCP")
+	reader := TCP1078RTP{
+		Conn: conn,
+	}
+
+	reader.Start(func(data util.Buffer) (err error) {
+		var rtpPacket Packet
+		if err = rtpPacket.Unmarshal(data); err != nil {
+			Jtt1078Plugin.Error("jt1078 decode rtp error:", zap.Error(err))
 		}
-		for _, receiver := range receivers {
-			receiver.Stop(ze)
-		}
-	}()
-	logger.Info("todo...")
+		return
+	})
 }
