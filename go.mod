@@ -1,4 +1,4 @@
-module github.com/Monibuca/plugin-demo
+module github.com/bytebit/plugin-jtt1078
 
 go 1.19
 
