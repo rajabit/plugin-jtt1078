@@ -61,5 +61,5 @@ func (config *Jtt1078Config) ServeTCP(conn net.Conn) {
 			receiver.Stop(ze)
 		}
 	}()
-	NewNetConnection(conn)
+	logger.Info("todo...")
 }
