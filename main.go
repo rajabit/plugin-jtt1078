@@ -12,7 +12,7 @@ import (
 /*
 自定义配置结构体
 配置文件中可以添加相关配置来设置结构体的值
-jtt1078:
+Jtt1078:
 
 	http:
 	publish:
@@ -26,26 +26,24 @@ type Jtt1078Config struct {
 	config.TCP
 }
 
-var jtt1078Config = &Jtt1078Config{
-	TCP: config.TCP{ListenAddr: ":9022"},
-}
+var conf Jtt1078Config
 
 // 安装插件
-var Jtt1078Plugin = InstallPlugin(jtt1078Config)
+var Jtt1078Plugin = InstallPlugin(&conf)
 
 // 插件事件回调，来自事件总线
 func (c *Jtt1078Config) OnEvent(event any) {
 	switch event.(type) {
-	case FirstConfig: // 插件启动事件
+	case FirstConfig:
 		if c.TCP.ListenAddr != "" {
-			Jtt1078Plugin.Info("server jtt1078 start at", zap.String("listen addr", c.TCP.ListenAddr))
+			Jtt1078Plugin.Info("server rtmp start at", zap.String("listen addr", c.TCP.ListenAddr))
 			go c.ListenTCP(Jtt1078Plugin, c)
 		}
 		break
 	}
 }
 
-// http://localhost:8080/jtt1078/api/test/pub
+// http://localhost:8080/Jtt1078/api/test/pub
 func (conf *Jtt1078Config) API_test_pub(rw http.ResponseWriter, r *http.Request) {
 	var pub Jtt1078Publisher
 	err := Jtt1078Plugin.Publish("jtt1078/test", &pub)
@@ -60,7 +58,7 @@ func (conf *Jtt1078Config) API_test_pub(rw http.ResponseWriter, r *http.Request)
 	rw.Write([]byte("test_pub"))
 }
 
-// http://localhost:8080/jtt1078/api/test/sub
+// http://localhost:8080/Jtt1078/api/test/sub
 func (conf *Jtt1078Config) API_test_sub(rw http.ResponseWriter, r *http.Request) {
 	var sub Jtt1078Subscriber
 	err := Jtt1078Plugin.Subscribe("jtt1078/test", &sub)
@@ -80,17 +78,9 @@ type Jtt1078Publisher struct {
 
 // 发布者事件回调
 func (pub *Jtt1078Publisher) OnEvent(event any) {
-	switch v := event.(type) {
-	case IPublisher: //代表发布成功事件
-	case SEclose: //代表关闭事件
-	case SEKick: //被踢出
-	case ISubscriber:
-		if v.IsClosed() {
-			//订阅者离开
-		} else {
-			//订阅者进入
-		}
-
+	switch event.(type) {
+	case IPublisher:
+		// 发布成功
 	default:
 		pub.Publisher.OnEvent(event)
 	}
