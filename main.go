@@ -26,7 +26,9 @@ type Jtt1078Config struct {
 	config.TCP
 }
 
-var conf Jtt1078Config
+var conf = Jtt1078Config{
+	TCP: config.TCP{ListenAddr: ":7222"},
+}
 
 // 安装插件
 var Jtt1078Plugin = InstallPlugin(&conf)
@@ -36,10 +38,9 @@ func (c *Jtt1078Config) OnEvent(event any) {
 	switch event.(type) {
 	case FirstConfig:
 		if c.TCP.ListenAddr != "" {
-			Jtt1078Plugin.Info("server rtmp start at", zap.String("listen addr", c.TCP.ListenAddr))
+			Jtt1078Plugin.Info("server jtt1078 start at", zap.String("listen addr", c.TCP.ListenAddr))
 			go c.ListenTCP(Jtt1078Plugin, c)
 		}
-		break
 	}
 }
 
