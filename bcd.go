@@ -56,7 +56,7 @@ var (
 			'8': 0x8, '9': 0x9, '*': 0xa, '#': 0xb,
 			'a': 0xc, 'b': 0xd, 'c': 0xe,
 		},
-		SwapNibbles: true,
+		SwapNibbles: false,
 		Filler:      0xf}
 
 	// Aiken or 2421 code

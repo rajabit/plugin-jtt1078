@@ -79,8 +79,9 @@ func (c *JTT1078Config) ServeTCP(conn net.Conn) {
 		if err = jtt1078Pkg.Unmarshal(data); err != nil {
 			JTT1078Plugin.Error("JTT1078 decode rtp error:", zap.Error(err))
 		}
-		JTT1078Plugin.Info("SequenceNumber", zap.Uint16("sn", jtt1078Pkg.SequenceNumber))
-		JTT1078Plugin.Info("PayloadLen", zap.Uint16("plen", jtt1078Pkg.PayloadLen))
+		// JTT1078Plugin.Info("SequenceNumber", zap.Uint16("sn", jtt1078Pkg.SequenceNumber))
+		// JTT1078Plugin.Info("PayloadLen", zap.Uint16("plen", jtt1078Pkg.PayloadLen))
+		fmt.Println(jtt1078Pkg.getLiveAddr())
 		return
 	})
 }

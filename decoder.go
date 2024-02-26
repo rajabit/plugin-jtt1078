@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"strconv"
 )
 
 // Header represents an RTP packet header
@@ -68,6 +69,32 @@ func (p Packet) String() string {
 	return out
 }
 
+func (p Packet) decodeSIM2String() string {
+	// decode SIM BCD[6]
+	dec := NewDecoder(Telephony)
+	dst := make([]byte, DecodedLen(len(p.SIM)))
+	var sim6 []byte = p.SIM[:]
+	n, err := dec.Decode(dst, sim6)
+	if err != nil {
+		fmt.Println("bcd decode error")
+		return ""
+	}
+	return string(dst[:n])
+}
+
+func (p Packet) getLiveAddr() string {
+	// decode SIM BCD[6]
+	dec := NewDecoder(Telephony)
+	dst := make([]byte, DecodedLen(len(p.SIM)))
+	var sim6 []byte = p.SIM[:]
+	n, err := dec.Decode(dst, sim6)
+	if err != nil {
+		fmt.Println("bcd decode error")
+		return ""
+	}
+	return string(dst[:n]) + "_" + strconv.Itoa(int(p.LogicChannel))
+}
+
 // Unmarshal parses the passed byte slice and stores the result in the Header.
 // It returns the number of bytes read n and any error.
 func (h *Header) Unmarshal(buf []byte) (n int, err error) { //nolint:gocognit
@@ -84,17 +111,6 @@ func (h *Header) Unmarshal(buf []byte) (n int, err error) { //nolint:gocognit
 	for i := 8; i < 14; i++ {
 		h.SIM[i-8] = buf[i]
 	}
-	fmt.Printf("sim:%s", h.SIM)
-	// decode SIM BCD[6]
-	dec := NewDecoder(Telephony)
-	dst := make([]byte, DecodedLen(len(h.SIM)))
-	var sim6 []byte = h.SIM[:]
-	n, err = dec.Decode(dst, sim6)
-	if err != nil {
-		fmt.Println("bcd decode error")
-		return
-	}
-	fmt.Println(string(dst[:n]))
 
 	h.LogicChannel = buf[14]
 	h.Datatype_Splitflag = buf[15]
