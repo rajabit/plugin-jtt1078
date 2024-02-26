@@ -80,16 +80,18 @@ func (h *Header) Unmarshal(buf []byte) (n int, err error) { //nolint:gocognit
 	h.M = (buf[5] >> 7 & 0x01) > 0
 	h.PT = buf[5] & 0x7f
 	h.SequenceNumber = binary.BigEndian.Uint16(buf[6:8])
-	for i := 8; i <= 14; i++ {
+	// fmt.Println(h.V_P_X_CC, " ", h.M, " ", h.PT, " ", h.SequenceNumber)
+	for i := 8; i < 14; i++ {
 		h.SIM[i-8] = buf[i]
 	}
-
+	fmt.Printf("sim:%s", h.SIM)
 	// decode SIM BCD[6]
 	dec := NewDecoder(Telephony)
 	dst := make([]byte, DecodedLen(len(h.SIM)))
 	var sim6 []byte = h.SIM[:]
 	n, err = dec.Decode(dst, sim6)
 	if err != nil {
+		fmt.Println("bcd decode error")
 		return
 	}
 	fmt.Println(string(dst[:n]))

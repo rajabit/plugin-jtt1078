@@ -75,10 +75,12 @@ func (c *JTT1078Config) ServeTCP(conn net.Conn) {
 	}
 
 	reader.Start(func(data util.Buffer) (err error) {
-		var rtpPacket Packet
-		if err = rtpPacket.Unmarshal(data); err != nil {
+		var jtt1078Pkg Packet
+		if err = jtt1078Pkg.Unmarshal(data); err != nil {
 			JTT1078Plugin.Error("JTT1078 decode rtp error:", zap.Error(err))
 		}
+		JTT1078Plugin.Info("SequenceNumber", zap.Uint16("sn", jtt1078Pkg.SequenceNumber))
+		JTT1078Plugin.Info("PayloadLen", zap.Uint16("plen", jtt1078Pkg.PayloadLen))
 		return
 	})
 }
