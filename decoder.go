@@ -21,6 +21,7 @@ type Header struct {
 	LastIFrameInterval uint16
 	LastFrameInterval  uint16
 	PayloadLen         uint16
+	// _pub_addr          uint64  // 00 SIM[6] LogicChannel，一共8个字节
 }
 
 // Packet represents an RTP Packet
@@ -193,10 +194,19 @@ func (h Header) MarshalTo(buf []byte) (n int, err error) {
 		buf[5] = h.PT | 0x80
 	}
 	binary.BigEndian.PutUint16(buf[6:8], h.SequenceNumber)
-	for i := 8; i <= 14; i++ {
+	for i := 8; i < 14; i++ {
 		buf[i] = h.SIM[i-8]
 	}
 	buf[14] = h.LogicChannel
+
+	// var paddr = make([]byte, 8)
+	// for i := 1; i <= 6; i++ {
+	// 	paddr[i] = h.SIM[i-1]
+	// }
+	// paddr[0] = 0x00
+	// paddr[7] = buf[14]
+	// binary.BigEndian.PutUint64(paddr, h._pub_addr)
+
 	buf[15] = h.Datatype_Splitflag
 	var offset int = 0
 	if (h.Datatype_Splitflag & 0xf0) != 0x40 { // 数据类型不是0100，则有8字节的时间戳

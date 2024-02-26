@@ -68,29 +68,6 @@ func (conf *JTT1078Config) API_test_sub(rw http.ResponseWriter, r *http.Request)
 	rw.Write([]byte("test_sub"))
 }
 
-// 自定义发布者
-type JTT1078Publisher struct {
-	Publisher
-}
-
-// 发布者事件回调
-func (pub *JTT1078Publisher) OnEvent(event any) {
-	switch v := event.(type) {
-	case IPublisher: //代表发布成功事件
-	case SEclose: //代表关闭事件
-	case SEKick: //被踢出
-	case ISubscriber:
-		if v.IsClosed() {
-			//订阅者离开
-		} else {
-			//订阅者进入
-		}
-
-	default:
-		pub.Publisher.OnEvent(event)
-	}
-}
-
 // 自定义订阅者
 type JTT1078Subscriber struct {
 	Subscriber
