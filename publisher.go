@@ -5,7 +5,7 @@ import (
 	"time"
 
 	. "m7s.live/engine/v4"
-	. "m7s.live/engine/v4/track"
+	"m7s.live/engine/v4/track"
 )
 
 // 自定义发布者
@@ -72,12 +72,14 @@ func (pub *JTT1078Publisher) OnEvent(event any) {
 // }
 
 func (p *JTT1078Publisher) PushPS(pkt *Packet) (err error) {
-	if p.PT == 98 {
+	// JTT1078Plugin.Logger.Info("PT", zap.Uint8("pt", pkt.PT))
+	if pkt.PT == 98 {
 		if p.VideoTrack == nil {
-			p.VideoTrack = NewH264(p.Publisher.Stream)
+			p.VideoTrack = track.NewH264(p.Publisher.Stream)
 		}
-		//fmt.Println(p.Packet)
-		p.WriteAnnexB(uint32(pkt.Timestamp), 0, pkt.Payload)
+		// JTT1078Plugin.Logger.Info("SequenceNumber", zap.Uint16("sn", pkt.SequenceNumber))
+		// JTT1078Plugin.Logger.Info("Timestamp", zap.Uint64("ts", pkt.Timestamp))
+		p.VideoTrack.WriteAnnexB(uint32(pkt.Timestamp)*90, uint32(pkt.Timestamp)*90, pkt.Payload)
 		//p.WriteSliceBytes(p.Packet.Payload)
 	}
 	return
