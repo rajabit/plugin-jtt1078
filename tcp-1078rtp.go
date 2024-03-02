@@ -3,7 +3,6 @@ package jtt1078
 import (
 	"bufio"
 	"encoding/binary"
-	"fmt"
 	"io"
 	"net"
 
@@ -74,8 +73,8 @@ func (t *TCP1078RTP) Start(onRTP func(util.Buffer) error) (err error) {
 		headerBuf = append(headerBuf, headerBuf_plen[:]...)
 		payloadLen := binary.BigEndian.Uint16(headerBuf_plen[0:2])
 		headerLen = headerLen + 2
-		fmt.Printf(".h.%d+", headerLen)
-		fmt.Printf(".p.%d\n", payloadLen)
+		// fmt.Printf(".h.%d+", headerLen)
+		// fmt.Printf(".p.%d\n", payloadLen)
 
 		buffer := make(util.Buffer, headerLen+(int)(payloadLen))
 		copy(buffer, headerBuf)

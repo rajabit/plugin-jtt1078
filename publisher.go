@@ -6,6 +6,7 @@ import (
 
 	. "m7s.live/engine/v4"
 	"m7s.live/engine/v4/track"
+	"m7s.live/engine/v4/util"
 )
 
 // 自定义发布者
@@ -22,6 +23,7 @@ func (pub *JTT1078Publisher) OnEvent(event any) {
 	switch v := event.(type) {
 	case IPublisher: //代表发布成功事件
 	case SEclose: //代表关闭事件
+		pub.Publisher.OnEvent(event)
 	case SEKick: //被踢出
 	case ISubscriber:
 		if v.IsClosed() {
@@ -73,14 +75,23 @@ func (pub *JTT1078Publisher) OnEvent(event any) {
 
 func (p *JTT1078Publisher) PushPS(pkt *Packet) (err error) {
 	// JTT1078Plugin.Logger.Info("PT", zap.Uint8("pt", pkt.PT))
-	if pkt.PT == 98 {
+	if pkt.PT == 98 || pkt.PT == 99 { // H264视频 || H265视频
 		if p.VideoTrack == nil {
 			p.VideoTrack = track.NewH264(p.Publisher.Stream)
 		}
 		// JTT1078Plugin.Logger.Info("SequenceNumber", zap.Uint16("sn", pkt.SequenceNumber))
 		// JTT1078Plugin.Logger.Info("Timestamp", zap.Uint64("ts", pkt.Timestamp))
 		p.VideoTrack.WriteAnnexB(uint32(pkt.Timestamp)*90, uint32(pkt.Timestamp)*90, pkt.Payload)
-		//p.WriteSliceBytes(p.Packet.Payload)
+	}
+	if pkt.PT == 6 || pkt.PT == 7 { // G711A || G711U
+		if p.AudioTrack == nil {
+			if pkt.PT == 6 { // G711A
+				p.AudioTrack = track.NewG711(p.Publisher.Stream, true)
+			} else { // G711U
+				p.AudioTrack = track.NewG711(p.Publisher.Stream, false)
+			}
+		}
+		p.AudioTrack.WriteRawBytes(uint32(pkt.Timestamp)*90, util.ReuseBuffer{pkt.Payload})
 	}
 	return
 }

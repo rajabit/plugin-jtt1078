@@ -50,13 +50,15 @@ func (c *JTT1078Config) ServeTCP(conn net.Conn) {
 		if err = jtt1078Pkg.Unmarshal(data); err != nil {
 			JTT1078Plugin.Error("JTT1078 decode rtp error:", zap.Error(err))
 		}
-		JTT1078Plugin.Info("receive jtt1078 stream @", tcpAddr)
-		JTT1078Plugin.Info("SequenceNumber", zap.Uint16("sn", jtt1078Pkg.SequenceNumber))
+		// JTT1078Plugin.Info("PT", zap.Uint8("PT", jtt1078Pkg.PT))
+		// JTT1078Plugin.Info("SequenceNumber", zap.Uint16("SN", jtt1078Pkg.SequenceNumber))
+		// JTT1078Plugin.Info("PayloadLength", zap.Uint16("PLen", jtt1078Pkg.PayloadLen))
 		if puber == nil {
 			puber = new(JTT1078Publisher)
 			if JTT1078Plugin.Publish("live/"+jtt1078Pkg.getLiveAddr(), puber) == nil {
 				//注册成功
 				puber.Info("发布流注册成功...", zap.String("@", jtt1078Pkg.getLiveAddr()))
+				puber.SetIO(conn)
 				puber.PushPS(&jtt1078Pkg)
 				return
 			}
