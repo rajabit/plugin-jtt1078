@@ -8,16 +8,7 @@ import (
 	"m7s.live/engine/v4/track"
 )
 
-/*
-自定义配置结构体
-配置文件中可以添加相关配置来设置结构体的值
-JTT1078:
-
-	http:
-	publish:
-	subscribe:
-	foo: bar
-*/
+// JTT1078Config /*
 type JTT1078Config struct {
 	config.HTTP
 	config.Publish
@@ -29,10 +20,10 @@ var conf = &JTT1078Config{
 	TCP: config.TCP{ListenAddr: ":7222"},
 }
 
-// 安装插件
+// Install the plugin
 var JTT1078Plugin = InstallPlugin(conf)
 
-// 插件事件回调，来自事件总线
+// Plugin event callback from the event bus
 func (c *JTT1078Config) OnEvent(event any) {
 	switch event.(type) {
 	case FirstConfig: // 插件启动事件
@@ -48,7 +39,7 @@ func (conf *JTT1078Config) API_test_pub(rw http.ResponseWriter, r *http.Request)
 		rw.Write([]byte(err.Error()))
 		return
 	} else {
-		vt := track.NewH264(pub.Stream)
+		vt := track.NewH264(pub.Stream.Publisher)
 		// 根据实际情况写入视频帧，需要注意pts和dts需要写入正确的值 即毫秒数*90
 		vt.WriteAnnexB(0, 0, []byte{0, 0, 0, 1})
 	}

@@ -77,7 +77,7 @@ func (p *JTT1078Publisher) PushPS(pkt *Packet) (err error) {
 	// JTT1078Plugin.Logger.Info("PT", zap.Uint8("pt", pkt.PT))
 	if pkt.PT == 98 || pkt.PT == 99 { // H264视频 || H265视频
 		if p.VideoTrack == nil {
-			p.VideoTrack = track.NewH264(p.Publisher.Stream)
+			p.VideoTrack = track.NewH264(p.Publisher.Stream.Publisher)
 		}
 		// JTT1078Plugin.Logger.Info("SequenceNumber", zap.Uint16("sn", pkt.SequenceNumber))
 		// JTT1078Plugin.Logger.Info("Timestamp", zap.Uint64("ts", pkt.Timestamp))
@@ -86,9 +86,9 @@ func (p *JTT1078Publisher) PushPS(pkt *Packet) (err error) {
 	if pkt.PT == 6 || pkt.PT == 7 { // G711A || G711U
 		if p.AudioTrack == nil {
 			if pkt.PT == 6 { // G711A
-				p.AudioTrack = track.NewG711(p.Publisher.Stream, true)
+				p.AudioTrack = track.NewG711(p.Publisher.Stream.Publisher, true)
 			} else { // G711U
-				p.AudioTrack = track.NewG711(p.Publisher.Stream, false)
+				p.AudioTrack = track.NewG711(p.Publisher.Stream.Publisher, false)
 			}
 		}
 		p.AudioTrack.WriteRawBytes(uint32(pkt.Timestamp)*90, util.ReuseBuffer{pkt.Payload})
